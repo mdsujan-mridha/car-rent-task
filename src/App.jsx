@@ -4,6 +4,9 @@ import { useGetCarsQuery } from './redux/api';
 import toast, { Toaster } from 'react-hot-toast';
 import Loader from './component/Loader';
 import { useReactToPrint } from 'react-to-print';
+import Header from './invoice/Header';
+import ClientDetails from './invoice/ClientDetails';
+import Table from './invoice/Table';
 
 function App() {
   const [previewInvoice, setPreviewInvoice] = useState(false);
@@ -17,10 +20,22 @@ function App() {
     liabilityInsurance: false,
     rentalTax: false,
   });
+  const [additional, setAdditional] = useState(0); // Correct initialization
+
+  // customer information 
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  // Reservation Details
+  const [reservationDate, setReservationDate] = useState("");
+  const [pickupDate, setPickupDate] = useState(Date.now());
+  const [returnDate, setReturnDate] = useState(Date);
+  const [discount, setDiscount] = useState(0);
+
 
   // use ref for read body data 
   const contentToPrint = useRef();
-
 
   useEffect(() => {
     if (data) {
@@ -34,6 +49,16 @@ function App() {
     }
   }, [data, error]);
 
+  // Log the additionalCharges whenever it changes
+  useEffect(() => {
+    const totalAdditionalCharges =
+      (additionalCharges.collisionDamageWaiver ? 9.00 : 0) +
+      (additionalCharges.liabilityInsurance ? 15.00 : 0) +
+      (additionalCharges.rentalTax ? (selectedCar ? (selectedCar.rates.hourly + selectedCar.rates.daily + selectedCar.rates.weekly) * 0.115 : 0) : 0);
+    console.log('Total Additional Charges:', totalAdditionalCharges);
+    setAdditional(totalAdditionalCharges);
+  }, [additionalCharges, selectedCar]);
+
   // this function is for handle which car is selected 
   const handleCarInformation = (e) => {
     const selectedCarId = e.target.value;
@@ -43,7 +68,6 @@ function App() {
   };
 
   // handle car type 
-
   const handleTypeChange = (event) => {
     const selectedType = event.target.value;
     setSelectedCarType(selectedType);
@@ -51,8 +75,7 @@ function App() {
     setFilteredCars(filtered);
   };
 
-  // if mark addition  charge then sum with rate 
-
+  // if mark addition charge then sum with rate 
   const handleAdditionalChargeChange = (event) => {
     const { id, checked } = event.target;
     setAdditionalCharges((prevCharges) => ({
@@ -104,8 +127,7 @@ function App() {
     ]
   });
 
-
-
+  console.log(additionalCharges);
 
   return (
     <>
@@ -124,115 +146,16 @@ function App() {
                   </div>
                   {/* ===================header component =========================== */}
                   <div className="grid grid-cols-2 items-center">
-                    <div>
-                      <img
-                        src="https://upload.wikimedia.org/wikipedia/commons/d/d5/Tailwind_CSS_Logo.svg"
-                        alt="company-logo"
-                        height="100"
-                        width="100"
-                      />
-                    </div>
-                    <div className="text-right">
-                      <p>Tailwind Inc.</p>
-                      <p className="text-gray-500 text-sm">sales@tailwindcss.com</p>
-                      <p className="text-gray-500 text-sm mt-1">+41-442341232</p>
-                      <p className="text-gray-500 text-sm mt-1">VAT: 8657671212</p>
-                    </div>
+                    <Header />
                   </div>
 
                   <div className="grid grid-cols-2 items-center mt-8">
-                    {/* =================bill summary =============== */}
-                    <div>
-                      <p className="font-bold text-gray-800">Bill to :</p>
-                      <p className="text-gray-500">
-                        Laravel LLC.
-                        <br />
-                        102, San-Francisco, CA, USA
-                      </p>
-                      <p className="text-gray-500">info@laravel.com</p>
-                    </div>
                     {/*============ client details ============== */}
-                    <div className="text-right">
-                      <p>
-                        Invoice number: <span className="text-gray-500">INV-2023786123</span>
-                      </p>
-                      <p>
-                        Invoice date: <span className="text-gray-500">03/07/2023</span>
-                        <br />
-                        Due date: <span className="text-gray-500">31/07/2023</span>
-                      </p>
-                    </div>
+                    <ClientDetails firstName={firstName} lastName={lastName} email={email} phone={phone} />
                   </div>
                   {/* =============================amount=============================  */}
                   <div className="-mx-4 mt-8 flow-root sm:mx-0">
-                    <table className="min-w-full">
-                      <colgroup>
-                        <col className="w-full sm:w-1/2" />
-                        <col className="sm:w-1/6" />
-                        <col className="sm:w-1/6" />
-                        <col className="sm:w-1/6" />
-                      </colgroup>
-                      <thead className="border-b border-gray-300 text-gray-900">
-                        <tr>
-                          <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">Items</th>
-                          <th scope="col" className="hidden px-3 py-3.5 text-right text-sm font-semibold text-gray-900 sm:table-cell">Quantity</th>
-                          <th scope="col" className="hidden px-3 py-3.5 text-right text-sm font-semibold text-gray-900 sm:table-cell">Price</th>
-                          <th scope="col" className="py-3.5 pl-3 pr-4 text-right text-sm font-semibold text-gray-900 sm:pr-0">Amount</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr className="border-b border-gray-200">
-                          <td className="max-w-0 py-5 pl-4 pr-3 text-sm sm:pl-0">
-                            <div className="font-medium text-gray-900">E-commerce Platform</div>
-                            <div className="mt-1 truncate text-gray-500">Laravel based e-commerce platform.</div>
-                          </td>
-                          <td className="hidden px-3 py-5 text-right text-sm text-gray-500 sm:table-cell">500.0</td>
-                          <td className="hidden px-3 py-5 text-right text-sm text-gray-500 sm:table-cell">$100.00</td>
-                          <td className="py-5 pl-3 pr-4 text-right text-sm text-gray-500 sm:pr-0">$5,000.00</td>
-                        </tr>
-
-                        <tr className="border-b border-gray-200">
-                          <td className="max-w-0 py-5 pl-4 pr-3 text-sm sm:pl-0">
-                            <div className="font-medium text-gray-900">Frontend Design</div>
-                            <div className="mt-1 truncate text-gray-500">Frontend design using Vue.js and Tailwind CSS.</div>
-                          </td>
-                          <td className="hidden px-3 py-5 text-right text-sm text-gray-500 sm:table-cell">500.0</td>
-                          <td className="hidden px-3 py-5 text-right text-sm text-gray-500 sm:table-cell">$100.00</td>
-                          <td className="py-5 pl-3 pr-4 text-right text-sm text-gray-500 sm:pr-0">$5,000.00</td>
-                        </tr>
-                        <tr className="border-b border-gray-200">
-                          <td className="max-w-0 py-5 pl-4 pr-3 text-sm sm:pl-0">
-                            <div className="font-medium text-gray-900">Shop SEO</div>
-                            <div className="mt-1 truncate text-gray-500">Website SEO and Social Media marketing.</div>
-                          </td>
-                          <td className="hidden px-3 py-5 text-right text-sm text-gray-500 sm:table-cell">50.0</td>
-                          <td className="hidden px-3 py-5 text-right text-sm text-gray-500 sm:table-cell">$100.00</td>
-                          <td className="py-5 pl-3 pr-4 text-right text-sm text-gray-500 sm:pr-0">$500.00</td>
-                        </tr>
-                      </tbody>
-                      <tfoot>
-                        <tr>
-                          <th scope="row" colSpan="3" className="hidden pl-4 pr-3 pt-6 text-right text-sm font-normal text-gray-500 sm:table-cell sm:pl-0">Subtotal</th>
-                          <th scope="row" className="pl-6 pr-3 pt-6 text-left text-sm font-normal text-gray-500 sm:hidden">Subtotal</th>
-                          <td className="pl-3 pr-6 pt-6 text-right text-sm text-gray-500 sm:pr-0">$10,500.00</td>
-                        </tr>
-                        <tr>
-                          <th scope="row" colSpan="3" className="hidden pl-4 pr-3 pt-4 text-right text-sm font-normal text-gray-500 sm:table-cell sm:pl-0">Tax</th>
-                          <th scope="row" className="pl-6 pr-3 pt-4 text-left text-sm font-normal text-gray-500 sm:hidden">Tax</th>
-                          <td className="pl-3 pr-6 pt-4 text-right text-sm text-gray-500 sm:pr-0">$1,050.00</td>
-                        </tr>
-                        <tr>
-                          <th scope="row" colSpan="3" className="hidden pl-4 pr-3 pt-4 text-right text-sm font-normal text-gray-500 sm:table-cell sm:pl-0">Discount</th>
-                          <th scope="row" className="pl-6 pr-3 pt-4 text-left text-sm font-normal text-gray-500 sm:hidden">Discount</th>
-                          <td className="pl-3 pr-6 pt-4 text-right text-sm text-gray-500 sm:pr-0">- 10%</td>
-                        </tr>
-                        <tr>
-                          <th scope="row" colSpan="3" className="hidden pl-4 pr-3 pt-4 text-right text-sm font-semibold text-gray-900 sm:table-cell sm:pl-0">Total</th>
-                          <th scope="row" className="pl-6 pr-3 pt-4 text-left text-sm font-semibold text-gray-900 sm:hidden">Total</th>
-                          <td className="pl-3 pr-4 pt-4 text-right text-sm font-semibold text-gray-900 sm:pr-0">$11,550.00</td>
-                        </tr>
-                      </tfoot>
-                    </table>
+                    <Table selectedCar={selectedCar} calculateTotal={calculateTotal} additional={additional} discount={discount} />
                   </div>
                   {/* ================================footer =========================================== */}
                   <div className="border-t-2 pt-4 text-xs text-gray-500 text-center mt-16">
@@ -274,7 +197,13 @@ function App() {
                           </div>
                           <div>
                             <label className="block mb-1" htmlFor="discount">Discount</label>
-                            <input className="w-full border border-gray-300 p-2 rounded" type="number" id="discount" />
+                            <input
+                              className="w-full border border-gray-300 p-2 rounded"
+                              type="number"
+                              id="discount"
+                              value={discount}
+                              onChange={(e) => setDiscount(e.target.value)}
+                            />
                           </div>
                         </form>
                         <div className="py-5">
@@ -314,19 +243,48 @@ function App() {
                         <form className="space-y-4">
                           <div>
                             <label className="block mb-1" htmlFor="firstName">First Name*</label>
-                            <input className="w-full border border-gray-300 p-2 rounded" type="text" id="firstName" required />
+                            <input
+                              className="w-full border border-gray-300 p-2 rounded"
+                              type="text"
+                              id="firstName"
+                              required
+                              value={firstName}
+                              onChange={(e) => setFirstName(e.target.value)}
+                            />
                           </div>
                           <div>
                             <label className="block mb-1" htmlFor="lastName">Last Name*</label>
-                            <input className="w-full border border-gray-300 p-2 rounded" type="text" id="lastName" required />
+                            <input
+                              className="w-full border border-gray-300 p-2 rounded"
+                              type="text"
+                              id="lastName"
+                              required
+                              value={lastName}
+                              onChange={(e) => setLastName(e.target.value)}
+
+                            />
                           </div>
                           <div>
                             <label className="block mb-1" htmlFor="email">Email*</label>
-                            <input className="w-full border border-gray-300 p-2 rounded" type="email" id="email" required />
+                            <input
+                              className="w-full border border-gray-300 p-2 rounded"
+                              type="email"
+                              id="email"
+                              required
+                              value={email}
+                              onChange={(e) => setEmail(e.target.value)}
+                            />
                           </div>
                           <div>
                             <label className="block mb-1" htmlFor="phone">Phone*</label>
-                            <input className="w-full border border-gray-300 p-2 rounded" type="tel" id="phone" required />
+                            <input
+                              className="w-full border border-gray-300 p-2 rounded"
+                              type="tel"
+                              id="phone"
+                              required
+                              value={phone}
+                              onChange={(e) => setPhone(e.target.value)}
+                            />
                           </div>
                         </form>
                         <h2 className="text-lg font-semibold mt-6 mb-4 border-b-2" style={{ borderColor: "#5D5CFF" }}>Additional Charges</h2>
