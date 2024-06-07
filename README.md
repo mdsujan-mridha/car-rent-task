@@ -1,8 +1,12 @@
-# React + Vite
+# Car Rental System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Pricing Scenarios
 
-Currently, two official plugins are available:
+In our rental car system, we ensure customers are charged the most favorable rate. For example, if the hourly rental cost exceeds the daily rate for a given rental period, we charge the customer the daily rate instead of the hourly rate.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+**Example:**
+- Tesla rental: $10/hour, $50/day
+- If rented for 6 hours, hourly cost = $60
+- Since $60 exceeds the daily rate of $50, the customer is charged $50
+
+This logic ensures fairness and transparency in our pricing model.
