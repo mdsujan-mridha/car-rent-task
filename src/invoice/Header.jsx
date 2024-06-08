@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 const Header = () => {
     return (
@@ -12,8 +12,8 @@ const Header = () => {
                 />
             </div>
             <div className="text-right">
-                <p>Tailwind Inc.</p>
-                <p className="text-gray-500 text-sm">sales@tailwindcss.com</p>
+                <p>Nyntax .</p>
+                <p className="text-gray-500 text-sm">sales@nyntax.com,</p>
                 <p className="text-gray-500 text-sm mt-1">+41-442341232</p>
                 <p className="text-gray-500 text-sm mt-1">VAT: 8657671212</p>
             </div>

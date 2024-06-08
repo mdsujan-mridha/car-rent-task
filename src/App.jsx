@@ -21,17 +21,22 @@ function App() {
     rentalTax: false,
   });
   const [additional, setAdditional] = useState(0); // Correct initialization
-
   // customer information 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   // Reservation Details
-  const [reservationDate, setReservationDate] = useState("");
-  const [pickupDate, setPickupDate] = useState(Date.now());
-  const [returnDate, setReturnDate] = useState(Date);
+  const [reservationId, setReservationId] = useState("");
+  const [pickupDate, setPickupDate] = useState(new Date().toISOString().slice(0, 16)); // Current date and time in 'yyyy-MM-ddTHH:mm' format
+  const [returnDate, setReturnDate] = useState(new Date().toISOString().slice(0, 16));
   const [discount, setDiscount] = useState(0);
+  const [hour, setHour] = useState(0);
+  const [day, setDay] = useState(0);
+  const [week, setWeek] = useState(0);
+  const [baseRate, setBaseRate] = useState(0); // New state for base rate
+  const [totalRate, setTotalRate] = useState(0); // New state for total rate
+
 
 
   // use ref for read body data 
@@ -54,10 +59,10 @@ function App() {
     const totalAdditionalCharges =
       (additionalCharges.collisionDamageWaiver ? 9.00 : 0) +
       (additionalCharges.liabilityInsurance ? 15.00 : 0) +
-      (additionalCharges.rentalTax ? (selectedCar ? (selectedCar.rates.hourly + selectedCar.rates.daily + selectedCar.rates.weekly) * 0.115 : 0) : 0);
-    console.log('Total Additional Charges:', totalAdditionalCharges);
+      (additionalCharges.rentalTax ? (baseRate * 0.115) : 0);
+    // console.log('Total Additional Charges:', totalAdditionalCharges);
     setAdditional(totalAdditionalCharges);
-  }, [additionalCharges, selectedCar]);
+  }, [additionalCharges, baseRate]);
 
   // this function is for handle which car is selected 
   const handleCarInformation = (e) => {
@@ -85,25 +90,29 @@ function App() {
   };
 
   // calculate total rate 
-  const calculateTotal = () => {
+  const calculateBaseRate = () => {
     if (!selectedCar) return 0;
     const hourlyRate = selectedCar.rates?.hourly || 0;
     const dailyRate = selectedCar.rates?.daily || 0;
     const weeklyRate = selectedCar.rates?.weekly || 0;
-    let total = hourlyRate + dailyRate + weeklyRate;
 
-    if (additionalCharges.collisionDamageWaiver) {
-      total += 9.00;
-    }
-    if (additionalCharges.liabilityInsurance) {
-      total += 15.00;
-    }
-    if (additionalCharges.rentalTax) {
-      total *= 1.115;
-    }
+    let baseTotal = (hour * hourlyRate) + (day * dailyRate) + (week * weeklyRate);
+    return baseTotal;
+  };
 
+  const calculateTotalRate = () => {
+    let total = baseRate + additional - discount;
     return total.toFixed(2);
   };
+
+  useEffect(() => {
+    const baseTotal = calculateBaseRate();
+    setBaseRate(baseTotal);
+    const total = calculateTotalRate();
+    setTotalRate(total);
+  }, [selectedCar, additional, discount, hour, day, week, baseRate]);
+
+
 
   // function for handle print 
   const handlePrint = useReactToPrint({
@@ -127,7 +136,13 @@ function App() {
     ]
   });
 
-  console.log(additionalCharges);
+  // console.log(additionalCharges);
+  // console.log(pickupDate);
+  // console.log(returnDate);
+  // console.log(discount);
+  // console.log("base price", baseRate);
+  // console.log("total price", totalRate);
+
 
   return (
     <>
@@ -139,7 +154,7 @@ function App() {
             previewInvoice ?
 
               (<>
-                <div className="max-w-3xl mx-auto p-6 bg-white rounded shadow-sm my-6" id="invoice" ref={contentToPrint}>
+                <div className="max-w-3xl mx-auto p-6 bg-white rounded my-6 shadow-md" id="invoice" ref={contentToPrint}>
                   <div className='flex justify-end py-5 gap-5'>
                     <button className='w-36 h-12  text-white font-bold rounded-xl bg-gray-600' onClick={() => handlePrint(null, () => contentToPrint.current)}> Print/ Download </button>
                     <button className='w-36 h-12  text-white font-bold rounded-xl bg-cyan-400' onClick={() => setPreviewInvoice(false)}> Edit Information </button>
@@ -151,11 +166,19 @@ function App() {
 
                   <div className="grid grid-cols-2 items-center mt-8">
                     {/*============ client details ============== */}
-                    <ClientDetails firstName={firstName} lastName={lastName} email={email} phone={phone} />
+                    <ClientDetails
+                      firstName={firstName}
+                      lastName={lastName}
+                      email={email}
+                      phone={phone}
+                      reservationId={reservationId}
+                      pickupDate={pickupDate}
+                      returnDate={returnDate}
+                    />
                   </div>
                   {/* =============================amount=============================  */}
                   <div className="-mx-4 mt-8 flow-root sm:mx-0">
-                    <Table selectedCar={selectedCar} calculateTotal={calculateTotal} additional={additional} discount={discount} />
+                    <Table selectedCar={selectedCar} additional={additional} discount={discount} baseRate={baseRate} totalRate={totalRate} />
                   </div>
                   {/* ================================footer =========================================== */}
                   <div className="border-t-2 pt-4 text-xs text-gray-500 text-center mt-16">
@@ -181,19 +204,63 @@ function App() {
                         <form className="space-y-4">
                           <div>
                             <label className="block mb-1" htmlFor="reservationId">Reservation ID</label>
-                            <input className="w-full border border-gray-300 p-2 rounded" type="text" id="reservationId" />
+                            <input
+                              className="w-full border border-gray-300 p-2 rounded"
+                              type="text"
+                              id="reservationId"
+                              value={reservationId}
+                              onChange={(e) => setReservationId(e.target.value)}
+                            />
                           </div>
                           <div>
                             <label className="block mb-1" htmlFor="pickupDate">Pickup Date*</label>
-                            <input className="w-full border border-gray-300 p-2 rounded" type="datetime-local" id="pickupDate" required />
+                            <input
+                              className="w-full border border-gray-300 p-2 rounded"
+                              type="datetime-local"
+                              id="pickupDate"
+                              required
+                              value={pickupDate}
+                              onChange={(e) => setPickupDate(e.target.value)}
+                            />
                           </div>
                           <div>
                             <label className="block mb-1" htmlFor="returnDate">Return Date*</label>
-                            <input className="w-full border border-gray-300 p-2 rounded" type="datetime-local" id="returnDate" required />
+                            <input
+                              className="w-full border border-gray-300 p-2 rounded"
+                              type="datetime-local"
+                              id="returnDate"
+                              required
+                              value={returnDate}
+                              onChange={(e) => setReturnDate(e.target.value)}
+
+                            />
                           </div>
-                          <div>
-                            <label className="block mb-1" htmlFor="duration">Duration</label>
-                            <input className="w-full border border-gray-300 p-2 rounded" type="text" id="duration" />
+                          <div className='flex justify-between items-center gap-1'>
+                            <p> Duration </p>
+                            <input
+                              className="w-9 border border-gray-300 p-2 rounded"
+                              type="text"
+                              id="duration"
+                              value={hour}
+                              onChange={(e) => setHour(e.target.value)}
+                            />
+                            <span> Hour </span>
+                            <input
+                              className="w-9 border border-gray-300 p-2 rounded"
+                              type="text"
+                              id="duration"
+                              value={day}
+                              onChange={(e) => setDay(e.target.value)}
+                            />
+                            <span> Day </span>
+                            <input
+                              className="w-9 border border-gray-300 p-2 rounded"
+                              type="text"
+                              id="duration"
+                              value={week}
+                              onChange={(e) => setWeek(e.target.value)}
+                            />
+                            <span> Week </span>
                           </div>
                           <div>
                             <label className="block mb-1" htmlFor="discount">Discount</label>
@@ -336,14 +403,21 @@ function App() {
                                 <td>{selectedCar ? `$${selectedCar.rates?.weekly}` : '-'}</td>
                                 <td>{selectedCar ? `$${selectedCar.rates?.weekly}` : '-'}</td>
                               </tr>
+                              <tr>
+                                <td>Additional</td>
+                                <td>1</td>
+                                <td>{selectedCar ? `$${additional}` : '-'}</td>
+                                <td>{selectedCar ? `$${additional}` : '-'}</td>
+                              </tr>
                               <tr className="font-semibold">
                                 <td>Total</td>
                                 <td></td>
                                 <td></td>
-                                <td>{selectedCar ? `$${calculateTotal()}` : '-'}</td>
+                                <td> {totalRate} </td>
                               </tr>
                             </tbody>
                           </table>
+                          
                         </div>
                       </div>
                     </div>
