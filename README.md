@@ -1,12 +1,90 @@
-# Car Rental System
+# Car Rental Reservation System
 
-## Pricing Scenarios
+A React-based car rental reservation system with functionalities to select cars, apply additional charges, and generate an invoice.
 
-In our rental car system, we ensure customers are charged the most favorable rate. For example, if the hourly rental cost exceeds the daily rate for a given rental period, we charge the customer the daily rate instead of the hourly rate.
+## Key Features
 
-**Example:**
-- Tesla rental: $10/hour, $50/day
-- If rented for 6 hours, hourly cost = $60
-- Since $60 exceeds the daily rate of $50, the customer is charged $50
+- **Car Selection**: Users can select a car from a list filtered by vehicle type.
+- **Reservation Details**: Users can input and manage reservation details including pickup and return dates, and customer information.
+- **Additional Charges**: Users can add extra charges such as Collision Damage Waiver, Liability Insurance, and Rental Tax.
+- **Dynamic Pricing**: The system dynamically calculates the total rental rate based on the selected car, duration, and additional charges.
+- **Invoice Preview and Print**: Users can preview and print/download the invoice.
 
-This logic ensures fairness and transparency in our pricing model.
+## Functionality
+
+### Components
+
+1. **App.js**
+   - Manages the state of the application including car data, selected car, additional charges, customer information, and reservation details.
+   - Uses the `useGetCarsQuery` hook to fetch car data from the Redux store.
+   - Uses the `useReactToPrint` hook to handle invoice printing.
+   - Contains the logic to filter cars by type and calculate rates.
+
+2. **Header.js**
+   - Displays the header information of the invoice.
+
+3. **ClientDetails.js**
+   - Displays customer details in the invoice.
+
+4. **Table.js**
+   - Displays the breakdown of charges and the total amount in the invoice.
+
+5. **Loader.js**
+   - Displays a loading spinner when data is being fetched.
+
+### Hooks and Libraries
+
+- **useGetCarsQuery**: Custom hook to fetch car data.
+- **useReactToPrint**: Hook to handle printing functionality.
+- **react-hot-toast**: Library to show success and error notifications.
+
+### State Management
+
+- **useState**: Manages various states including selected car, customer information, additional charges, and rates.
+- **useEffect**: Fetches data and calculates rates when dependencies change.
+
+### Main Functionalities
+
+1. **Fetching and Displaying Cars**:
+   - Car data is fetched using the `useGetCarsQuery` hook.
+   - Cars are displayed in a dropdown, filtered by type.
+   - Users can select a car to view its details and rates.
+
+2. **Handling Additional Charges**:
+   - Users can select additional charges which will update the total amount dynamically.
+   - The `handleAdditionalChargeChange` function updates the state of additional charges.
+
+3. **Calculating Rates**:
+   - `calculateBaseRate` calculates the base rate based on the selected car and duration.
+   - `calculateTotalRate` calculates the total rate including additional charges and discounts.
+
+4. **Printing the Invoice**:
+   - The `handlePrint` function handles the invoice printing using the `useReactToPrint` hook.
+   - Users can preview the invoice before printing or downloading.
+
+### Example Usage
+
+1. **Selecting a Car**:
+   - Select a vehicle type from the dropdown.
+   - Select a specific car from the filtered list.
+
+2. **Entering Reservation Details**:
+   - Fill in the pickup and return dates.
+   - Enter customer information such as first name, last name, email, and phone number.
+
+3. **Adding Additional Charges**:
+   - Select additional charges (Collision Damage Waiver, Liability Insurance, Rental Tax).
+
+4. **Previewing and Printing the Invoice**:
+   - Click on "Preview Invoice" to view the invoice.
+   - Click on "Print/Download" to print or download the invoice.
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/car-rental-reservation-system.git
+   cd car-rental-reservation-system
+### Install dependencies:
+```bash
+     npm install
