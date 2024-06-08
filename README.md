@@ -83,8 +83,27 @@ A React-based car rental reservation system with functionalities to select cars,
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/car-rental-reservation-system.git
-   cd car-rental-reservation-system
+   git clone https://github.com/mdsujan-mridha/car-rent-task.git
+   cd car-rent-task
 ### Install dependencies:
 ```bash
      npm install
+```
+### Start the application:
+```bash
+    npm start
+
+```
+### Dependencies
+- `react`
+- `Redux Toolkit`
+- `react-hot-toast`
+- `RTK Query`
+- `react-to-print`
+- `Tailwind CSS`
+
+## License
+ This project is licensed under the MIT License.
+
+This `README.md` file provides an overview of the key features, describes the functionality, and includes installation instructions. Adjust the repository link and any specific details as needed.
+
