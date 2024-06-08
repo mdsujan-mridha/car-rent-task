@@ -102,6 +102,14 @@ A React-based car rental reservation system with functionalities to select cars,
 - `react-to-print`
 - `Tailwind CSS`
 
+### Author
+Md Sujan Mridha
+
+### Live link
+https://car-rent-task.vercel.app/
+
+
+
 ## License
  This project is licensed under the MIT License.
 
