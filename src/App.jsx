@@ -143,7 +143,21 @@ function App() {
   // console.log("base price", baseRate);
   // console.log("total price", totalRate);
 
+  const calculateSelectedCarBaseRate = () => {
+    if (!selectedCar) return 0;
+    const hourlyRate = selectedCar.rates?.hourly || 0;
+    const dailyRate = selectedCar.rates?.daily || 0;
+    const weeklyRate = selectedCar.rates?.weekly || 0;
 
+    let baseTotal = hourlyRate + dailyRate + weeklyRate;
+    return baseTotal;
+  };
+
+  // Usage
+  const selectedCarTotal = calculateSelectedCarBaseRate();
+
+
+  // console.log(selectedCarTotal);
   return (
     <>
       {isLoading ? (
@@ -403,26 +417,44 @@ function App() {
                                 <td>{selectedCar ? `$${selectedCar.rates?.weekly}` : '-'}</td>
                                 <td>{selectedCar ? `$${selectedCar.rates?.weekly}` : '-'}</td>
                               </tr>
-                              <tr>
-                                <td>Additional</td>
-                                <td>1</td>
-                                <td>{selectedCar ? `$${additional}` : '-'}</td>
-                                <td>{selectedCar ? `$${additional}` : '-'}</td>
-                              </tr>
-                              <tr className="font-semibold">
-                                <td>Total</td>
+                              <tr className="font-semibold border-t-2 border-gray-700 py-2">
+                                <td>Selected Car Rate</td>
                                 <td></td>
                                 <td></td>
-                                <td> {totalRate} </td>
+                                <td> {selectedCarTotal} </td>
                               </tr>
                             </tbody>
                           </table>
-                          
+                        </div>
+                        {/* invoice summary */}
+                        <div>
+                          <div className="mt-6">
+                            <h2 className="text-lg font-semibold mb-4">Invoice Summary</h2>
+                            <div className="border-t border-gray-300 pt-4">
+                              <div className="flex justify-between">
+                                <span>Base Rate:</span>
+                                <span>${baseRate.toFixed(2)}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Additional Charges:</span>
+                                <span>${additional.toFixed(2)}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Discount:</span>
+                                <span>${discount.toFixed(2)}</span>
+                              </div>
+                              <div className="flex justify-between font-bold">
+                                <span>Total Rate:</span>
+                                <span>${totalRate}</span>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
+
               </>)
           }
         </>
